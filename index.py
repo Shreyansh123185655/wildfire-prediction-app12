@@ -25,6 +25,7 @@ def handler(request):
             <h3>✅ Serverless Function is Working!</h3>
             <p>The API endpoint is live and responding correctly.</p>
             <p>Model loading and prediction features will be added next.</p>
+            <p><small>Updated: 2025-04-05 16:48 UTC</small></p>
         </div>
         <div style="text-align: center; margin: 20px 0;">
             <h3>🚀 Deployment Status: SUCCESS</h3>
