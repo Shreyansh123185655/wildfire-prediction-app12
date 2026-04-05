@@ -54,46 +54,50 @@ def handler(event, context):
                         'body': html_content
                     }
                 else:
+                    error_body = '<h1>404 - Frontend not found</h1>'
                     return {
                         'statusCode': 404,
                         'headers': {
                             'Content-Type': 'text/html',
                         },
-                        'body': '<h1>404 - Frontend not found</h1>'
+                        'body': error_body
                     }
             except Exception as e:
                 print(f"Error serving HTML: {str(e)}")
+                error_body = f'<h1>500 - Server Error: {str(e)}</h1>'
                 return {
                     'statusCode': 500,
                     'headers': {
                         'Content-Type': 'text/html',
                     },
-                    'body': f'<h1>500 - Server Error: {str(e)}</h1>'
+                    'body': error_body
                 }
         
         # Handle prediction API
         elif http_method == 'POST' and path == '/predict':
             try:
                 if not MODEL_LOADED:
+                    error_response = json.dumps({'error': f'Model not loaded: {MODEL_ERROR}'})
                     return {
                         'statusCode': 500,
                         'headers': {
                             'Content-Type': 'application/json',
                             'Access-Control-Allow-Origin': '*',
                         },
-                        'body': json.dumps({'error': f'Model not loaded: {MODEL_ERROR}'})
+                        'body': error_response
                     }
                 
                 # Parse request body
                 body_str = event.get('body', '{}')
                 if not body_str:
+                    error_response = json.dumps({'error': 'Empty request body'})
                     return {
                         'statusCode': 400,
                         'headers': {
                             'Content-Type': 'application/json',
                             'Access-Control-Allow-Origin': '*',
                         },
-                        'body': json.dumps({'error': 'Empty request body'})
+                        'body': error_response
                     }
                 
                 body = json.loads(body_str)
@@ -102,13 +106,14 @@ def handler(event, context):
                 required_fields = ['temperature', 'min_temp', 'rainfall', 'wind_speed', 'month', 'day_of_year', 'lagged_rainfall', 'lagged_wind', 'season']
                 for field in required_fields:
                     if field not in body:
+                        error_response = json.dumps({'error': f'Missing required field: {field}'})
                         return {
                             'statusCode': 400,
                             'headers': {
                                 'Content-Type': 'application/json',
                                 'Access-Control-Allow-Origin': '*',
                             },
-                            'body': json.dumps({'error': f'Missing required field: {field}'})
+                            'body': error_response
                         }
                 
                 # Calculate derived features
@@ -138,11 +143,12 @@ def handler(event, context):
                 prediction = model.predict(input_data)[0]
                 probability = model.predict_proba(input_data)[0][1]
                 
-                response = {
+                response_data = {
                     "prediction": int(prediction),
                     "probability": float(probability)
                 }
                 
+                response_body = json.dumps(response_data)
                 return {
                     'statusCode': 200,
                     'headers': {
@@ -151,18 +157,19 @@ def handler(event, context):
                         'Access-Control-Allow-Methods': 'POST, OPTIONS',
                         'Access-Control-Allow-Headers': 'Content-Type',
                     },
-                    'body': json.dumps(response)
+                    'body': response_body
                 }
                 
             except Exception as e:
                 print(f"Prediction error: {str(e)}")
+                error_response = json.dumps({'error': f'Prediction failed: {str(e)}'})
                 return {
                     'statusCode': 500,
                     'headers': {
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*',
                     },
-                    'body': json.dumps({'error': f'Prediction failed: {str(e)}'})
+                    'body': error_response
                 }
         
         # Handle CORS preflight
@@ -179,22 +186,24 @@ def handler(event, context):
         
         # Handle 404
         else:
+            error_response = json.dumps({'error': f'Endpoint not found: {http_method} {path}'})
             return {
                 'statusCode': 404,
                 'headers': {
                     'Content-Type': 'application/json',
                 },
-                'body': json.dumps({'error': f'Endpoint not found: {http_method} {path}'})
+                'body': error_response
             }
             
     except Exception as e:
         print(f"Handler error: {str(e)}")
+        error_response = json.dumps({'error': f'Handler failed: {str(e)}'})
         return {
             'statusCode': 500,
             'headers': {
                 'Content-Type': 'application/json',
             },
-            'body': json.dumps({'error': f'Handler failed: {str(e)}'})
+            'body': error_response
         }
 
 # Vercel entrypoint
