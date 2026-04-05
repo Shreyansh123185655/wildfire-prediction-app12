@@ -1,7 +1,6 @@
-import os
 import json
 
-def handler(request):
+def handler(event, context):
     # Simple HTML response for testing
     html_content = """
 <!DOCTYPE html>
@@ -15,7 +14,7 @@ def handler(request):
         .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1 { color: #ff6b35; text-align: center; }
         .status { background: #e3f2fd; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0; }
-        .error { background: #ffebee; color: #c62828; padding: 15px; border-radius: 5px; text-align: center; }
+        .success { background: #e8f5e8; color: #2e7d32; padding: 15px; border-radius: 5px; text-align: center; }
     </style>
 </head>
 <body>
@@ -25,11 +24,11 @@ def handler(request):
             <h3>✅ Serverless Function is Working!</h3>
             <p>The API endpoint is live and responding correctly.</p>
             <p>Model loading and prediction features will be added next.</p>
-            <p><small>Updated: 2025-04-05 16:48 UTC</small></p>
         </div>
-        <div style="text-align: center; margin: 20px 0;">
+        <div class="success">
             <h3>🚀 Deployment Status: SUCCESS</h3>
             <p>Your Vercel deployment is working correctly!</p>
+            <p><small>Updated: 2025-04-05 16:52 UTC</small></p>
         </div>
     </div>
 </body>
